@@ -1,8 +1,8 @@
 //! ModernBERT encoder layer planning and CPU reference for Magnetar.
 //!
 //! This library preserves checkpoint attention layout and can evaluate a
-//! supported f32 encoder with caller-supplied weights. It does not yet load
-//! checkpoint weights or produce Magnetar graphs.
+//! supported f32 encoder with caller-supplied weights. Its WebAssembly build
+//! can produce an encoder graph; checkpoint loading remains separate.
 
 use serde::Deserialize;
 use std::collections::BTreeMap;
@@ -10,6 +10,8 @@ use std::error::Error;
 use std::fmt;
 
 pub mod encoder_reference;
+#[cfg(target_arch = "wasm32")]
+mod graph_component;
 
 const MAX_LAYERS: usize = 4096;
 
