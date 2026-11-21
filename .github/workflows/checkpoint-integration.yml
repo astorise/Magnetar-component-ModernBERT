@@ -1,0 +1,19 @@
+name: ModernBERT checkpoint integration
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checkpoint-layout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Install Rust toolchain
+        run: rustup toolchain install 1.100.0 --profile minimal
+      - name: Check real checkpoint attention layouts
+        run: cargo +1.100.0 test --locked --test checkpoint_integration
