@@ -4,12 +4,14 @@ ModernBERT encoder component for [Magnetar](https://github.com/astorise/Magnetar
 
 ## Status
 
-The initial Rust library validates a checkpoint's bidirectional attention
-layout, preserving global/local layer order, per-kind RoPE theta and the first
-layer's missing attention LayerNorm. Integration tests check configurations
-from published ModernBERT-base and Laya encoder checkpoints. Model loading,
-graph production, Component Model exports and inference remain unimplemented;
-ModernBERT is not yet runnable in Magnetar.
+The Rust library validates a checkpoint's bidirectional attention layout and
+provides an f32 CPU encoder reference using supplied weights. It preserves
+global/local layer order, per-kind RoPE theta, physical or explicit position
+IDs, padding masks and the first layer's missing attention LayerNorm. Synthetic
+full-encoder tests compare the pinned Transformers layers for both bias forms,
+including padded queries and local windows. Model loading, graph production
+and Component Model exports remain unimplemented; ModernBERT is not yet
+runnable in Magnetar.
 
 ## Work required
 

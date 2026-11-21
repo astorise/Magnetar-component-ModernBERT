@@ -1,12 +1,15 @@
-//! ModernBERT encoder layer planning for Magnetar.
+//! ModernBERT encoder layer planning and CPU reference for Magnetar.
 //!
-//! This initial implementation preserves the checkpoint's ordered attention
-//! layout. It does not yet build Magnetar graphs or execute model weights.
+//! This library preserves checkpoint attention layout and can evaluate a
+//! supported f32 encoder with caller-supplied weights. It does not yet load
+//! checkpoint weights or produce Magnetar graphs.
 
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::error::Error;
 use std::fmt;
+
+pub mod encoder_reference;
 
 const MAX_LAYERS: usize = 4096;
 
