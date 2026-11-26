@@ -14,3 +14,15 @@ jobs:
     with:
       module-path: components/modernbert
       deny: false
+  component-wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Install the Magnetar toolchain
+        run: rustup toolchain install 1.100.0 --profile minimal --target wasm32-unknown-unknown
+      - uses: taiki-e/install-action@b050602e5cf884cc290b53af42beca341f1a5a76 # wasm-tools
+      - name: Build and validate the encoder Component
+        run: |
+          cargo +1.100.0 build --locked --release --target wasm32-unknown-unknown
+          wasm-tools component new target/wasm32-unknown-unknown/release/magnetar_component_modernbert.wasm -o "$RUNNER_TEMP/modernbert.component.wasm"
+          wasm-tools validate "$RUNNER_TEMP/modernbert.component.wasm" --features component-model
