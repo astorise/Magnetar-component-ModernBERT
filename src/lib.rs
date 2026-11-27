@@ -9,6 +9,7 @@ use std::collections::BTreeMap;
 use std::error::Error;
 use std::fmt;
 
+pub mod checkpoint;
 pub mod encoder_reference;
 #[cfg(target_arch = "wasm32")]
 mod graph_component;
