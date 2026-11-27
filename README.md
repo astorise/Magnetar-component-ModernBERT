@@ -16,6 +16,17 @@ the checkpoint weights (linear weights transposed to `[input, output]`). The
 Component builds a bidirectional graph with physical positions starting at
 zero and produces final hidden states.
 
+`checkpoint::CheckpointProfile` derives graph settings and the exact expected
+tensor names, shapes and matrix transpositions from the supported ModernBERT
+configuration, including the `encoder.` namespace used by Laya. It checks a
+previously parsed F16/BF16/F32 inventory before payload decoding and rejects
+missing or unexpected encoder tensors. Individual decoded weights can be
+converted to graph order; a validated set can also construct the f32 CPU
+reference. The caller remains responsible for authenticating, parsing and
+decoding the checkpoint. Tests exercise the Laya encoder configuration and
+compare synthetic decoded checkpoints with the independent Transformers
+fixture, including padding and bias variants.
+
 The full production loading and encoder inference paths are still being
 integrated, so this is not yet an end-user inference interface. The numerical
 integration test in Magnetar executes the Component's graph against synthetic
