@@ -48,7 +48,7 @@ pub struct GraphSettings {
     pub vocabulary_size: usize,
     pub attention_heads: usize,
     pub max_positions: usize,
-    pub norm_epsilon: f32,
+    pub norm_epsilon: f64,
     pub norm_bias: bool,
     pub attention_bias: bool,
     pub mlp_bias: bool,
@@ -59,7 +59,7 @@ pub struct GraphSettings {
 pub struct GraphLayerSettings {
     /// Inclusive symmetric window radius, or `None` for global attention.
     pub local_radius: Option<usize>,
-    pub rope_theta: f32,
+    pub rope_theta: f64,
     pub attention_normalization: bool,
 }
 
@@ -106,7 +106,7 @@ pub struct CheckpointProfile {
     vocabulary: usize,
     intermediate: usize,
     max_positions: usize,
-    epsilon: f32,
+    epsilon: f64,
     norm_bias: bool,
     attention_bias: bool,
     mlp_bias: bool,
@@ -157,6 +157,7 @@ impl CheckpointProfile {
             || raw.intermediate_size > 131_072
             || raw.max_position_embeddings == 0
             || raw.max_position_embeddings > (1 << 24)
+            || layout.local_attention / 2 > u32::MAX as usize
             || !raw.norm_eps.is_finite()
             || !epsilon.is_finite()
             || epsilon <= 0.0
@@ -178,7 +179,7 @@ impl CheckpointProfile {
             vocabulary: raw.vocab_size,
             intermediate: raw.intermediate_size,
             max_positions: raw.max_position_embeddings,
-            epsilon,
+            epsilon: raw.norm_eps,
             norm_bias: raw.norm_bias,
             attention_bias: raw.attention_bias,
             mlp_bias: raw.mlp_bias,
@@ -212,7 +213,7 @@ impl CheckpointProfile {
                 .map(|layer| GraphLayerSettings {
                     local_radius: (layer.attention == crate::AttentionKind::Local)
                         .then_some(self.layout.local_attention / 2),
-                    rope_theta: layer.rope_theta as f32,
+                    rope_theta: layer.rope_theta,
                     attention_normalization: layer.has_attention_norm,
                 })
                 .collect(),
@@ -364,7 +365,7 @@ impl CheckpointProfile {
             heads: self.layout.attention_heads,
             max_positions: self.max_positions,
             local_radius: self.layout.local_attention / 2,
-            epsilon: self.epsilon,
+            epsilon: self.epsilon as f32,
             token_embedding,
             embedding_norm,
             layers,

@@ -260,6 +260,10 @@ fn config_rejects_unsupported_activation_missing_settings_and_bad_geometry() {
         ("max_position_embeddings", serde_json::json!(0)),
         ("norm_eps", serde_json::json!(0)),
         ("norm_eps", serde_json::json!(1e-100)),
+        (
+            "local_attention",
+            serde_json::json!(u32::MAX as u64 * 2 + 2),
+        ),
     ] {
         let mut bad = good.clone();
         bad[key] = value;
@@ -281,4 +285,19 @@ fn config_rejects_unsupported_activation_missing_settings_and_bad_geometry() {
         )
         .is_err()
     );
+}
+
+#[test]
+fn graph_settings_preserve_checkpoint_f64_values() {
+    let mut value: serde_json::Value = serde_json::from_slice(&config(false)).unwrap();
+    value["norm_eps"] = serde_json::json!(0.000010000000123);
+    value["rope_parameters"]["full_attention"]["rope_theta"] = serde_json::json!(160000.123456789);
+    let profile = CheckpointProfile::from_huggingface_config(
+        &serde_json::to_vec(&value).unwrap(),
+        CheckpointNamespace::Root,
+    )
+    .unwrap();
+    let settings = profile.graph_settings();
+    assert_eq!(settings.norm_epsilon, 0.000010000000123);
+    assert_eq!(settings.layers[0].rope_theta, 160000.123456789);
 }
